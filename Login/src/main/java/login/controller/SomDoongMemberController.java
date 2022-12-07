@@ -1,14 +1,21 @@
 package login.controller;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import login.dto.SomDoongMember;
@@ -59,7 +66,7 @@ public class SomDoongMemberController {
 	}
 	
 	@PostMapping("login")
-	public String loginProcess(SomDoongMember member, HttpSession session) {
+	public String loginProcess(SomDoongMember member, HttpSession session, HttpServletRequest request, HttpServletResponse response ) throws IOException {
 		logger.info("{}", member);
 		
 		boolean loginResult = somDoongMemberService.login(member);
@@ -77,9 +84,13 @@ public class SomDoongMemberController {
 		}else {
 			logger.info("로그인 실패");
 			
-			session.invalidate();
 			
-			return"redirect:/member/login";
+				response.setContentType("text/html; charset=UTF-8");
+	            PrintWriter out = response.getWriter();
+	            out.println("<script>alert('아이디와 비밀번호를 확인해 주세요!'); history.go(-1);</script>");
+	            out.flush(); 
+
+	    	return null;
 			
 		}
 		
@@ -103,16 +114,61 @@ public class SomDoongMemberController {
 	}
 
 	
-	@GetMapping("idfind")
+	@RequestMapping("idfind")
 	public void idfind() {
 		
 	}
 	
+	@RequestMapping("idfindresult")
+	public String idfindresult(HttpServletRequest request, Model model,
+		    @RequestParam(required = true, value = "username") String username, 
+		    @RequestParam(required = true, value = "userphone") int userphone,
+		    SomDoongMember searchMember) {
+		
+		try {
+		    
+			searchMember.setUsername(username);
+			searchMember.setUserphone(userphone);
+			SomDoongMember memberSearch = somDoongMemberService.memberIdSearch(searchMember);
+		    
+		    model.addAttribute("searchMember", memberSearch);
+		 
+		} catch (Exception e) {
+		    System.out.println(e.toString());
+		}
+		 
+		return "/member/idfindresult";	
+	}
 	
-	@GetMapping("pwfind")
+	
+	@RequestMapping("pwfind")
 	public void pwfind() {
 		
 	}
+	
+	@RequestMapping("pwfindresult")
+	public String pwfindresult(HttpServletRequest request, Model model,
+		    @RequestParam(required = true, value = "userid") String userid, 
+		    @RequestParam(required = true, value = "email") String email,    
+		    SomDoongMember searchMember) {
+		
+		try {
+		    
+			searchMember.setUserid(userid);
+			searchMember.setEmail(email);
+			SomDoongMember memberSearch = somDoongMemberService.memberPwdCheck(searchMember);
+		    
+			
+			model.addAttribute("searchMember", memberSearch);
+		   		 
+		} catch (Exception e) {
+		    System.out.println(e.toString());	    
+		}
+		 
+		 
+		return "/member/pwfindresult";
+		}
+
 	
 	@ResponseBody
 	@GetMapping("idcheck")
