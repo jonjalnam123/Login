@@ -54,10 +54,7 @@ public class SomDoongMemberController {
 		return "redirect:/member/login";
 	}
 	
-	@RequestMapping("joinsuc")
-	public void joinsuc() {
-		logger.info("/member/joinsuc 요청완료!");
-	}
+
 	
 	@GetMapping("login")
 	public void login() {
@@ -122,7 +119,7 @@ public class SomDoongMemberController {
 	@RequestMapping("idfindresult")
 	public String idfindresult(HttpServletRequest request, Model model,
 		    @RequestParam(required = true, value = "username") String username, 
-		    @RequestParam(required = true, value = "userphone") int userphone,
+		    @RequestParam(required = true, value = "userphone") String userphone,
 		    SomDoongMember searchMember) {
 		
 		try {
@@ -171,7 +168,7 @@ public class SomDoongMemberController {
 
 	
 	@ResponseBody
-	@GetMapping("idcheck")
+	@GetMapping("/idcheck")
 	public int idcheck(SomDoongMember member) {
 		logger.info("idcheck [GET] 요청완료!");
 		int result = somDoongMemberService.idcheck(member);
